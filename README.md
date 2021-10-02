@@ -1,2 +1,2 @@
 # Video-call
-just a simpoe video call (with pyqt) . 
+just a simple video call (with pyqt) . 
