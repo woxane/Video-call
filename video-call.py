@@ -60,7 +60,7 @@ class Ui_MainWindow(object):
 
     def webcam_show_0(self , connection_type , ip_port) : # 0 means your webcam not connection webcam .
         if connection_type == "host" :
-            ip , port = ip_port.split(":")
+            ip , port = ip_port.split(" ")
             server = procces("host" , ip , port)
 
         elif connection_type == "client" : 
