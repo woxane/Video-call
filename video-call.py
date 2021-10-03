@@ -17,24 +17,31 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(0, 0, 741, 391))
-        self.label.setScaledContents(True)
-        self.label.setObjectName("label")
+        self.webcam_1 = QtWidgets.QLabel(self.centralwidget)
+        self.webcam_1.setGeometry(QtCore.QRect(0, 0, 741, 391))
+        self.webcam_1.setScaledContents(True)
+        self.webcam_1.setObjectName("webcam-0")
+
+        self.webcam_0 = QtWidgets.QLabel(self.centralwidget)
+        self.webcam_0.setGeometry(QtCore.QRect(0, 0, 741, 391))
+        self.webcam_0.setScaledContents(True)
+        self.webcam_0.setObjectName("webcam-1")
+
+        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit.setGeometry(QtCore.QRect(0, 401, 291, 41))
+        self.lineEdit.setObjectName("lineEdit")
 
         self.connect_Button = QtWidgets.QPushButton(self.centralwidget)
         self.connect_Button.setGeometry(QtCore.QRect(290, 400, 141, 41))
         self.connect_Button.setObjectName("connection")
         self.connect_Button.setText("push for connection")
+        self.connect_Button.clicked.connect(lambda : Thread(target = self.webcam_show_0 , args = ("client" , self.lineEdit.text())).start())
 
         self.server_Button = QtWidgets.QPushButton(self.centralwidget)
         self.server_Button.setGeometry(QtCore.QRect(437,400,141,41))
         self.server_Button.setObjectName("server")
         self.server_Button.setText("push for start server")
-
-        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit.setGeometry(QtCore.QRect(0, 401, 291, 41))
-        self.lineEdit.setObjectName("lineEdit")
+        self.server_Button.clicked.connect(lambda : Thread(target = self.webcam_show_0 , args = ("host" , self.lineEdit.text())).start())
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -49,19 +56,29 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
 
-    def webcam_show_0(self , frame) : # 0 means your webcam not connection webcam
-       
-        
+    def webcam_show_0(self , connection_type , ip_port) : # 0 means your webcam not connection webcam .
+        if connection_type == "host" :
+            ip , port = ip_port.split(":")
+            server = procces("host" , ip , port)
+
+        elif connection_type == "client" : 
+            ip , port = ip_port.split(":")
+            server = procces("client" , ip , port)
+
+        else : return "There is a problem to for connection_type ."
+    
+        Thread(target = server.get_data).start()
+
         webcam = cv2.VideoCapture(0)
         _ , frame = webcam.read()
         height , width , channel = frame.shape
-        self.label.setGeometry(QtCore.QRect(0 , 0, width , height))
+        self.webcam_0.setGeometry(QtCore.QRect(0 , 0, width , height))
         bytesPerLine = 3 * width
         while True : 
             _ , frame = webcam.read()
-            #TODO : ADD PROCCESS CLASS , WE NEED FOR SENDING DATA .
+            server.send_data(frame)
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
-            self.label.setPixmap(QtGui.QPixmap(qImg))
+            self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
 
 
@@ -69,13 +86,15 @@ class Ui_MainWindow(object):
         hight , width , channel = frame.shape
         bytesPerLine = 3 * width
         qImg = QtGui.QImage(frame.data , width , hight , bytesPerLine , QtGui.QImage.Format_BGR888)
-        self.label.setPixmap(QtGui.QPixmap(qImg))
+        self.webcam_1.setPixmap(QtGui.QPixmap(qImg))
+
+
 
 
 
 class procces : 
-    def __init__(self , connection_type , port , ip = "127.0.0.1") : 
-        self.server_config = (ip , port) 
+    def __init__(self , connection_type , ip , port) : 
+        self.server_config = (ip , int(port)) 
         
         if connection_type == "host" : 
             self.server_socket = socket.socket(socket.AF_INET , socket.SOCK_STREAM)
@@ -86,18 +105,16 @@ class procces :
             print(f"{self.client_info} has connected into server")
 
         elif connection_type == "client" : 
-            self.client_socket = socket.socket(socket.AF_INET , socket.SOCK_STREAM)
-            self.client_socket.connect(self.server_config)
+            self.server_socket = socket.socket(socket.AF_INET , socket.SOCK_STREAM) # I change client_socket to server_socket for have one function to send no two .
+            self.server_socket.connect(self.server_config)
+            print("connected ... ")
         
 
-    def host_send_data(self , frame_data) : 
+    def send_data(self , frame_data) : 
         data = pickle.dumps(frame_data)
-        self.server_socket.send(struct.pack("L" , len(data)) + data)
-
-
-    def client_send_data(self , frame_data) : 
-        data = pickle .dumps(frame_data)
-        self.client_socket.send(struct.pack("L" , len(data)) + data)
+        try :
+            self.server_socket.send(struct.pack("L" , len(data)) + data)
+        except : print("oh no yamete kodasai")
 
 
     def get_data(self) : 
@@ -105,19 +122,23 @@ class procces :
         payload_size = struct.calcsize("L")
         while True :
             while len(data) < payload_size :
-                data += self.client_socket.recv(4096)
+                data += self.server_socket.recv(4096)
             
             packed_msg_size = data[:payload_size]
             data = data[payload_size:]
             msg_size = struct.unpack("L" , packed_msg_size)[0]
             n = 0
             while len(data) < msg_size : 
-                data += self.client_socket.recv(4096)
+                data += self.server_socket.recv(4096)
             frame_data = data[:msg_size]
             data = data[msg_size:]
             
             frame = pickle.loads(frame_data)
-            ui.webcam_show_1(frame)
+            if frame :
+                ui.webcam_show_1(frame)
+            else : 
+                print("shit we can't get the data ") #TODO DELETE THIS ELSE CONDITION AFTER TEST .
+                print(frame)
 
 
 
