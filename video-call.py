@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
             server = procces("host" , ip , port)
 
         elif connection_type == "client" : 
-            ip , port = ip_port.split(":")
+            ip , port = ip_port.split(" ")
             server = procces("client" , ip , port)
 
         else : return "There is a problem to for connection_type ."
