@@ -70,7 +70,7 @@ class Ui_MainWindow(object):
 
         else : return "There is a problem to for connection_type ."
     
-        Thread(target = server.get_data , args = (connection_type)).start()
+        Thread(target = server.get_data , args = (connection_type , )).start()
 
         webcam = cv2.VideoCapture(0)
         _ , frame = webcam.read()
