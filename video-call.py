@@ -21,12 +21,12 @@ class Ui_MainWindow(object):
 
         self.webcam_1 = QtWidgets.QLabel(self.centralwidget)
         self.webcam_1.setGeometry(QtCore.QRect(0, 0, 741, 391))
-        self.webcam_1.setScaledContents(True)
+        #self.webcam_1.setScaledContents(True)
         self.webcam_1.setObjectName("webcam-0")
 
         self.webcam_0 = QtWidgets.QLabel(self.centralwidget)
-        self.webcam_0.setGeometry(QtCore.QRect(0, 0, 741, 391))
-        self.webcam_0.setScaledContents(True)
+        self.webcam_0.setGeometry(QtCore.QRect(0, 0, 191, 151))
+        #self.webcam_0.setScaledContents(True)
         self.webcam_0.setObjectName("webcam-1")
 
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
@@ -74,7 +74,6 @@ class Ui_MainWindow(object):
         webcam = cv2.VideoCapture(0)
         _ , frame = webcam.read()
         height , width , channel = frame.shape
-        self.webcam_0.setGeometry(QtCore.QRect(0 , 0, width , height))
         bytesPerLine = 3 * width
         while True : 
             _ , frame = webcam.read()
