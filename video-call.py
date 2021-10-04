@@ -145,9 +145,10 @@ class procces :
                 packed_msg_size = data[:payload_size]
                 data = data[payload_size:]
                 msg_size = struct.unpack("L" , packed_msg_size)[0]
-                n = 0
+
                 while len(data) < msg_size : 
                     data += socket_connection.recv(4096)
+                    print(data)
                 frame_data = data[:msg_size]
                 data = data[msg_size:]
                 
@@ -155,7 +156,7 @@ class procces :
                 if frame :
                     ui.webcam_show_1(frame)
                 else : 
-                    print("shit we can't get the data ") #TODO DELETE THIS ELSE CONDITION AFTER TEST .
+                    print("shit we can't get the data ") #TODO DELETE THIS ELSE CONDITION AFTER TEST AND THE TRY EXCEPT .
                     print(frame)
 
         except : 
