@@ -159,6 +159,7 @@ class procces :
                     print(frame)
 
         except : 
+            print("there is an fukcing error ")
             self.get_data(type)
 
 
