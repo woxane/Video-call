@@ -26,9 +26,8 @@ class Ui_MainWindow(object):
 
         self.webcam_0 = QtWidgets.QLabel(self.centralwidget)
         self.webcam_0.setGeometry(QtCore.QRect(0, 0, 191, 151))
-        #self.webcam_0.setScaledContents(True)
+        self.webcam_0.setScaledContents(True)
         self.webcam_0.setObjectName("webcam-1")
-
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(0, 401, 291, 41))
         self.lineEdit.setObjectName("lineEdit")
@@ -62,10 +61,12 @@ class Ui_MainWindow(object):
         if connection_type == "host" :
             ip , port = ip_port.split(" ")
             server = procces("host" , ip , port)
+            send_data = server.send_data_h
 
         elif connection_type == "client" : 
             ip , port = ip_port.split(" ")
             server = procces("client" , ip , port)
+            send_data = server.send_data_c
 
         else : return "There is a problem to for connection_type ."
     
@@ -77,7 +78,7 @@ class Ui_MainWindow(object):
         bytesPerLine = 3 * width
         while True : 
             _ , frame = webcam.read()
-            server.send_data(frame)
+            send_data(frame)
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
             self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
@@ -111,26 +112,40 @@ class procces :
             print("connected ... ")
         
 
-    def send_data(self , frame_data) : 
+    def send_data_c(self , frame_data) : 
         data = pickle.dumps(frame_data)
         try :
             self.server_socket.send(struct.pack("L" , len(data)) + data)
         except : print("oh no yamete kodasai")
 
 
-    def get_data(self) : 
+    def send_data_h(self , frame_data) : 
+        data = pickle.dumps(frame_data)
+        try :
+            self.client.send(struct.pack("L" , len(data)) + data)
+        except : print("oh no yamete kodasai")
+
+
+    def get_data(self , type ) : 
+        if type == "host" : 
+            socket_connection = self.client
+        elif type == "client" : 
+            socket_connection = self.server_socket
+       
+        else : return "There is problem for giving type attribute . "  # Just if the type isn't in the if statment , stop to function .
+
         data = b""
         payload_size = struct.calcsize("L")
         while True :
             while len(data) < payload_size :
-                data += self.server_socket.recv(4096)
+                data += socket_connection.recv(4096)
             
             packed_msg_size = data[:payload_size]
             data = data[payload_size:]
             msg_size = struct.unpack("L" , packed_msg_size)[0]
             n = 0
             while len(data) < msg_size : 
-                data += self.server_socket.recv(4096)
+                data += socket_connection.recv(4096)
             frame_data = data[:msg_size]
             data = data[msg_size:]
             
