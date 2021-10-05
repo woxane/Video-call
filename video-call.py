@@ -72,7 +72,7 @@ class Ui_MainWindow(object):
     
         Thread(target = server.get_data , args = (connection_type , )).start()
 
-        webcam = cv2.VideoCapture(0)
+        webcam = cv2.VideoCapture(5)
         _ , frame = webcam.read()
         height , width , channel = frame.shape
         bytesPerLine = 3 * width
