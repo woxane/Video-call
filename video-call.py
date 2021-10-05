@@ -156,8 +156,10 @@ class procces :
                 data += socket_connection.recv(4096)
             
             packed_msg_size = data[:payload_size]
+            print(packed_msg_size)
             data = data[payload_size:]
             msg_size = struct.unpack("L" , packed_msg_size)[0]
+            print(msg_size)
 
             while len(data) < msg_size : 
                 data += socket_connection.recv(4096)
