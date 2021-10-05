@@ -78,15 +78,14 @@ class Ui_MainWindow(object):
         else : return "There is a problem to for connection_type ."
     
         Thread(target = server.get_data , args = (connection_type , )).start()
-        send = partial(Thread , target = send_data)
 
         webcam = cv2.VideoCapture(0)
         _ , frame = webcam.read()
         height , width , channel = frame.shape
         bytesPerLine = 3 * width
         while True : 
-            _ , frame = webcam.read()
-            send(args = (frame ,)).start()
+            _ , frame = webcam.read() 
+            Thread(target = send_data , args = (frame , )).start()
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
             self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
@@ -134,12 +133,13 @@ class procces :
     def send_data_c(self , frame_data) : 
         data = pickle.dumps(frame_data)
         self.server_socket.send(struct.pack("L" , len(data)) + data)
+        del(data)
 
 
     def send_data_h(self , frame_data) : 
         data = pickle.dumps(frame_data)
         self.client.send(struct.pack("L" , len(data)) + data)
-
+        del(data)
 
     def get_data(self , type ) : 
         if type == "host" : 
