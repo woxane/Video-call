@@ -85,7 +85,7 @@ class Ui_MainWindow(object):
         bytesPerLine = 3 * width
         while True : 
             _ , frame = webcam.read() 
-            Thread(target = send_data , args = (frame , )).start()
+            send_data(frame)
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
             self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
@@ -133,6 +133,7 @@ class procces :
     def send_data_c(self , frame_data) : 
         data = pickle.dumps(frame_data)
         self.server_socket.send(struct.pack("L" , len(data)) + data)
+
         print(len(data))
         del(data)
 
