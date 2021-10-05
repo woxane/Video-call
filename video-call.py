@@ -146,6 +146,7 @@ class procces :
             data = data[msg_size:]
             
             frame = pickle.loads(frame_data)
+            print("i got the frame")
             ui.webcam_show_1(frame)
 
 
