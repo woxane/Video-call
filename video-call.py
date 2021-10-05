@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
         bytesPerLine = 3 * width
         while True : 
             _ , frame = webcam.read()
-            send_data(frame)
+            Thread(target = send_data , args = (frame , )).start() # using Thread in here cuase the webcam output (video in program) waits until the frame send and then show it . 
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
             self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
