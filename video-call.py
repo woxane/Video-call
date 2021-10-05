@@ -163,10 +163,11 @@ class procces :
                 data += socket_connection.recv(4096)
             frame_data = data[:msg_size]
             data = data[msg_size:]
-            
-            frame = pickle.loads(frame_data)
-            print("i got the frame")
-            ui.webcam_show_1(frame)
+            try :  
+                frame = pickle.loads(frame_data)
+                print("i got the frame")
+                ui.webcam_show_1(frame)
+            except : print('there is a error that i cant fix it')
 
 
 
