@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import pickle
+from functools import partial
 import cv2
 import struct
 import socket
@@ -77,6 +78,7 @@ class Ui_MainWindow(object):
         else : return "There is a problem to for connection_type ."
     
         Thread(target = server.get_data , args = (connection_type , )).start()
+        send = partial(Thread , target = send_data)
 
         webcam = cv2.VideoCapture(0)
         _ , frame = webcam.read()
@@ -84,7 +86,7 @@ class Ui_MainWindow(object):
         bytesPerLine = 3 * width
         while True : 
             _ , frame = webcam.read()
-            Thread(target = send_data , args = (frame , )).start() # using Thread in here cuase the webcam output (video in program) waits until the frame send and then show it . 
+            send(args = (frame ,)).start()
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
             self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
