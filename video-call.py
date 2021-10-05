@@ -21,16 +21,22 @@ class Ui_MainWindow(object):
 
         self.webcam_1 = QtWidgets.QLabel(self.centralwidget)
         self.webcam_1.setGeometry(QtCore.QRect(0, 0, 741, 391))
-        #self.webcam_1.setScaledContents(True)
-        self.webcam_1.setObjectName("webcam-0")
+        self.webcam_1.setObjectName("webcam-1")
 
         self.webcam_0 = QtWidgets.QLabel(self.centralwidget)
         self.webcam_0.setGeometry(QtCore.QRect(0, 0, 191, 151))
         self.webcam_0.setScaledContents(True)
-        self.webcam_0.setObjectName("webcam-1")
+        self.webcam_0.setObjectName("webcam-0")
+
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit.setGeometry(QtCore.QRect(0, 401, 291, 41))
         self.lineEdit.setObjectName("lineEdit")
+
+        self.show_test = QtWidgets.QPushButton(self.centralwidget)
+        self.show_test.setGeometry(QtCore.QRect(627, 400, 141, 41))
+        self.show_test.setObjectName("show test")
+        self.show_test.setText("test your webcam")
+        self.show_test.clicked.connect(lambda : Thread(target=self.show_webcam_0_test).start())
 
         self.connect_Button = QtWidgets.QPushButton(self.centralwidget)
         self.connect_Button.setGeometry(QtCore.QRect(290, 400, 141, 41))
@@ -82,6 +88,17 @@ class Ui_MainWindow(object):
             qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
             self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
+    
+    def show_webcam_0_test(self) : 
+        webcam = cv2.VideoCapture(0)
+        _ , frame = webcam.read()
+        height , width , channel = frame.shape
+        bytesPerLine = 3 * width
+
+        while True : 
+            _ , frame = webcam.read()
+            qImg = QtGui.QImage(frame.data , width , height , bytesPerLine , QtGui.QImage.Format_BGR888)
+            self.webcam_0.setPixmap(QtGui.QPixmap(qImg))
 
 
     def webcam_show_1(self , frame) : # 1 means webcam of who connect to you
