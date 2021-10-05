@@ -133,12 +133,14 @@ class procces :
     def send_data_c(self , frame_data) : 
         data = pickle.dumps(frame_data)
         self.server_socket.send(struct.pack("L" , len(data)) + data)
+        print(len(data))
         del(data)
 
 
     def send_data_h(self , frame_data) : 
         data = pickle.dumps(frame_data)
         self.client.send(struct.pack("L" , len(data)) + data)
+        print(len(data))
         del(data)
 
     def get_data(self , type ) : 
